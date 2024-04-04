@@ -6,7 +6,7 @@ require_once __DIR__. '/inc/header.php';
 <section>
     <!-- login form with username and password -->
     <h2>Login</h2>
-    <form action="login.php" method="post">
+    <form action="operations/login.php" method="post">
         <div>
             <label for="username">Username</label>
             <input type="text" name="username" id="username">
@@ -22,7 +22,7 @@ require_once __DIR__. '/inc/header.php';
 <section>
     <!-- register form with username , password and email -->
     <h2>Register</h2>
-    <form action="register.php" method="post">
+    <form action="operations/register.php" method="post">
         <div>
             <label for="username">Username</label>
             <input type="text" name="username" id="username">

@@ -1,30 +1,28 @@
 <?php
 global $DBH;
-require_once 'dbConnect.php';
+require_once __DIR__ . '/../db/dbConnect.php';
+
+require_once __DIR__ . '/../MediaProject/MediaItemDatabaseOps.class.php';
+
+$MediaItemDatabaseOps = new MediaProject\MediaItemDatabaseOps($DBH);
 
 if (isset($_GET['id'])) {
-    $sql = 'SELECT * FROM MediaItems WHERE media_id = :media_id';
 
     $data = [
         'media_id' => $_GET['id']
     ];
 
-    try {
-        $STH = $DBH->prepare($sql);
-        $STH->execute($data);
-        $STH->setFetchMode(PDO::FETCH_ASSOC);
-        $row = $STH->fetch();
-    } catch (PDOException $e) {
-        echo "Could not get data from the database." . $e->getMessage();
-        file_put_contents('PDOErrors.txt', 'modifyForm.php - ' . $e->getMessage(), FILE_APPEND);
+    $mediaItem = $MediaItemDatabaseOps->getMediaItem($data);
+    if(!$mediaItem){
+        header('Location: ../home.php?success=Item not found');
         exit;
-    }
-
+    };
+    $row = $mediaItem->getMediaItem();
 }
 
 ?>
 
-<form action="modifyData.php" method="post">
+<form action="operations/modifyData.php" method="post">
     <input type="hidden" name="media_id" value="<?php echo $row['media_id']; ?>">
     <div>
         <label for="title">Title</label>

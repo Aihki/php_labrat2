@@ -1,13 +1,17 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-    header('Location: index.php');
+    header('Location: ../index.php');
     exit;
 }
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 global $DBH;
-require 'dbConnect.php';
+require_once __DIR__ . '/../db/dbConnect.php';
+
+require_once __DIR__ . '/../MediaProject/MediaItemDatabaseOps.class.php';
+
+$MediaItemDatabaseOps = new MediaProject\MediaItemDatabaseOps($DBH);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['title']) && isset($_POST['description']) && $_FILES['file'] !== null) {
@@ -15,9 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $filetype = $_FILES['file']['type'];
         $filesize = $_FILES['file']['size'];
         $temp_file = $_FILES['file']['tmp_name'];
-        $destination = __DIR__ . '/uploads/' . $filename;
+        $destination = __DIR__ . '/../uploads/' . $filename;
         if (!move_uploaded_file($temp_file, $destination)) {
-             header('Location: home.php?success=File upload failed');
+            header('Location: ../home.php?success=File upload failed');
             exit;
         }
 
@@ -30,16 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'filesize' => $filesize,
         ];
 
-        $sql = 'INSERT INTO MediaItems (user_id, filename, filesize, media_type, title, description) 
-                VALUES (:user_id, :filename, :filesize, :media_type, :title, :description)';
 
-        try {
-            $STH = $DBH->prepare($sql);
-            $STH->execute($data);
-            header('Location: home.php?success=Item added');
-        } catch (PDOException $e) {
-            echo "Could not insert data into the database.";
-            file_put_contents('PDOErrors.txt', 'insertData.php - ' . $e->getMessage(), FILE_APPEND);
+
+
+        if ($MediaItemDatabaseOps->insertMediaItem($data)) {
+            header('Location: ../home.php?success=Item added');
+        } else {
+            header('Location: ../home.php?success=Item not added');
         }
     }
 }
